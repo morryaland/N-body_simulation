@@ -4,15 +4,17 @@
 #include <stdlib.h>
 
 #include "include/quad_tree.h"
+#include "include/sdl_draw.h"
 
 int main(int argc, char **argv)
 {
-  particle_c = 10;
+  particle_c = 1000;
   particles = malloc(sizeof(PARTICLE) * particle_c);
   for (int i = 0; i < particle_c; i++) {
     particles[i].x = rand()%100 - 50;
     particles[i].y = rand()%100 - 50;
   }
   quad_tree_init();
+  quad_tree_draw();
   quad_tree_free();
 }

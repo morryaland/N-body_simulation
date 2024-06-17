@@ -10,7 +10,8 @@
 typedef struct __qtree {
   float massx, massy;
   int mass;
-  struct __qtree *a, *b, *c, *d;
+  int nx, ny, ex, ey;
+  struct __qtree *p, *a, *b, *c, *d;
 } QTREE_NODE;
 
 typedef struct {

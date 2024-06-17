@@ -9,12 +9,17 @@ PARTICLE *particles;
 int particle_c;
 QTREE *qtree;
 
-static void quad_tree(QTREE_NODE *node, int depth, int nx, int ny, int ex, int ey)
+static void quad_tree(QTREE_NODE *parent, QTREE_NODE *node, int depth, int nx, int ny, int ex, int ey)
 {
   if (!depth)
     return;
   if (!node)
     node = talloc_zero(qtree->ctx, QTREE_NODE);
+  node->p = parent;
+  node->nx = nx;
+  node->ny = ny;
+  node->ex = ex;
+  node->ey = ey;
   for (int i = 0; i < particle_c; i++) {
     if (particles[i].x < ex && particles[i].y < ey &&
         particles[i].x > nx && particles[i].y > ny) {
@@ -29,16 +34,16 @@ static void quad_tree(QTREE_NODE *node, int depth, int nx, int ny, int ex, int e
   }
   if(node->mass == 1){
     //TODO
-    printf("%d %d %d %d\n", nx, ny, ex, ey);
+    //printf("%d %d %d %d\n", nx, ny, ex, ey);
     return;
   }
   int midx = (nx + ex) >> 1;
   int midy = (ny + ey) >> 1;
   depth--;
-  quad_tree(node->a, depth, nx, ny, midx, midy);
-  quad_tree(node->b, depth, midx, ny, ex, midy);
-  quad_tree(node->c, depth, midx, midy, ex, ey);
-  quad_tree(node->d, depth, nx, midy, midx, ey);
+  quad_tree(node, node->a, depth, nx, ny, midx, midy);
+  quad_tree(node, node->b, depth, midx, ny, ex, midy);
+  quad_tree(node, node->c, depth, midx, midy, ex, ey);
+  quad_tree(node, node->d, depth, nx, midy, midx, ey);
 }
 
 static int particle_ln()
@@ -80,7 +85,7 @@ int quad_tree_init()
   if (depth < 0)
     return -1;
   int bord = (int)(powf(2, depth) + 0.5f);
-  quad_tree(qtree->child, depth, -bord, -bord, bord, bord);
+  quad_tree(NULL, qtree->child, depth, -bord, -bord, bord, bord);
   return 0;
 }
 
