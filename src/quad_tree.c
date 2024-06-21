@@ -1,20 +1,22 @@
-/*See file LICENSE for full license details.*/
+/* AUTHOR: muly / morryaland
+ * See file LICENSE for full license details.*/
 
-#include <talloc.h>
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "include/quad_tree.h"
 
 PARTICLE *particles;
 int particle_c;
-QTREE *qtree;
+QTREE_NODE *qtree;
 
 static void quad_tree(QTREE_NODE *parent, QTREE_NODE *node, int depth, int nx, int ny, int ex, int ey)
 {
   if (!depth)
     return;
   if (!node)
-    node = talloc_zero(qtree->ctx, QTREE_NODE);
+    node = tzalloc(sizeof(QTREE_NODE), parent);
   node->p = parent;
   node->nx = nx;
   node->ny = ny;
@@ -75,22 +77,19 @@ int quad_tree_update()
 int quad_tree_init()
 {
   if (!qtree)
-    qtree = malloc(sizeof(QTREE));
-  qtree->ctx = talloc_new(NULL);
-  if (!qtree->ctx)
-    return -1;
+    qtree = tzalloc(sizeof(QTREE_NODE), NULL);
   if (!particles || !particle_c)
     return -1;
   int depth = particle_ln();
   if (depth < 0)
     return -1;
   int bord = (int)(powf(2, depth) + 0.5f);
-  quad_tree(NULL, qtree->child, depth, -bord, -bord, bord, bord);
+  quad_tree(NULL, qtree, depth, -bord, -bord, bord, bord);
   return 0;
 }
 
 void quad_tree_free()
 {
-  if (qtree && qtree->ctx)
-    talloc_free(qtree->ctx);
+  if (qtree)
+    tfree(qtree);
 }

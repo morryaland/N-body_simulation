@@ -1,10 +1,10 @@
-/*See file LICENSE for full license details.*/
+/* AUTHOR: muly / morryaland
+ * See file LICENSE for full license details.*/
 
 #ifndef QUAD_TREE_H
 #define QUAD_TREE_H
 
-#include <talloc.h>
-
+#include "../../lib/talloc/talloc.h"
 #include "particle.h"
 
 typedef struct __qtree {
@@ -14,12 +14,7 @@ typedef struct __qtree {
   struct __qtree *p, *a, *b, *c, *d;
 } QTREE_NODE;
 
-typedef struct {
-  TALLOC_CTX *ctx;
-  QTREE_NODE *child;
-} QTREE;
-
-extern QTREE *qtree;
+extern QTREE_NODE *qtree;
 
 int quad_tree_update();
 
