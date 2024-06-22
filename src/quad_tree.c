@@ -10,6 +10,7 @@
 PARTICLE *particles;
 int particle_c;
 QTREE_NODE *qtree;
+QTREE_NODE **upper_qtree_node;
 
 static void quad_tree(QTREE_NODE *parent, QTREE_NODE *node, int depth, int nx, int ny, int ex, int ey)
 {
@@ -18,13 +19,13 @@ static void quad_tree(QTREE_NODE *parent, QTREE_NODE *node, int depth, int nx, i
   if (!node)
     node = tzalloc(sizeof(QTREE_NODE), parent);
   node->p = parent;
-  node->nx = nx;
-  node->ny = ny;
-  node->ex = ex;
-  node->ey = ey;
-  for (int i = 0; i < particle_c; i++) {
-    if (particles[i].x < ex && particles[i].y < ey &&
-        particles[i].x > nx && particles[i].y > ny) {
+  node->nx = nx; node->ny = ny; node->ex = ex; node->ey = ey;
+  node->contpart = talloc(sizeof(PARTICLE*), node);
+  for (int i = 0; i < parent->mass; i++) {
+    if (parent->contpart[i]->x < parent->ex && parent->contpart[i]->y < parent->ey &&
+        parent->contpart[i]->x > parent->nx && parent->contpart[i]->y > parent->ny) {
+      node->contpart = trealloc(node->contpart, sizeof(PARTICLE*) * (node->mass + 1));
+      node->contpart[node->mass] = parent->contpart[i];
       node->massx += particles[i].x;
       node->massy += particles[i].y;
       node->mass++;
@@ -66,30 +67,40 @@ static int particle_ln()
   return res;
 }
 
-int quad_tree_update()
+void quad_tree_update()
 {
   quad_tree_free();
-  if (quad_tree_init() < 0)
-    return -1;
-  return 0;
+  quad_tree_init();
 }
 
 int quad_tree_init()
 {
   if (!qtree)
     qtree = tzalloc(sizeof(QTREE_NODE), NULL);
-  if (!particles || !particle_c)
+  if (!particles || !particle_c) {
+    puts("ERROR: particles == NULL");
     return -1;
+  }
   int depth = particle_ln();
-  if (depth < 0)
+  if (depth < 0) {
+    puts("ERROR: depth ln");
     return -1;
+  }
   int bord = (int)(powf(2, depth) + 0.5f);
-  quad_tree(NULL, qtree, depth, -bord, -bord, bord, bord);
+  qtree->mass = particle_c;
+  qtree->contpart = talloc(sizeof(PARTICLE*) * particle_c, qtree);
+  for (int i = 0; i < particle_c; i++) {
+    qtree->contpart[i] = particles + i;
+  }
+  qtree->nx = -bord; qtree->ny = -bord; qtree->ex = bord; qtree->ey = bord;
+  quad_tree(qtree, NULL, depth, -bord, -bord, bord, bord);
   return 0;
 }
 
 void quad_tree_free()
 {
-  if (qtree)
+  if (qtree) {
     tfree(qtree);
+    qtree = NULL;
+  }
 }
