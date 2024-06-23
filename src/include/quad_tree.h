@@ -16,7 +16,6 @@ typedef struct __qtree {
 } QTREE_NODE;
 
 extern QTREE_NODE *qtree;
-extern QTREE_NODE **upper_qtree_node;
 
 void quad_tree_update();
 
