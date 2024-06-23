@@ -15,7 +15,9 @@ void Draw_quad_tree(QTREE_NODE **node)
 {
   if (!*node)
     return;
-  DrawRectangleLines((**node).nx, (**node).ny, (**node).ex -(**node).nx, (**node).ey -(**node).ny, DARKGREEN);
+  DrawRectangleLines((**node).nx, (**node).ny,
+                    (**node).ex - (**node).nx,
+                   (**node).ey - (**node).ny, DARKGREEN);
   Draw_quad_tree(&(**node).a);
   Draw_quad_tree(&(**node).b);
   Draw_quad_tree(&(**node).c);
@@ -28,15 +30,15 @@ int main(int argc, char **argv)
   const int screenHeight = 720;
   SetConfigFlags(FLAG_WINDOW_RESIZABLE );
   InitWindow(screenWidth, screenHeight, "celestial mechanic");
-  //SetTargetFPS(144);
+  SetTargetFPS(60);
 
   igCreateContext(NULL);
   ImGuiIO *ioptr = igGetIO();
-  ioptr->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;   // Enable Keyboard Controls
-  ioptr->ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
+  ioptr->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+  ioptr->ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 #ifdef IMGUI_HAS_DOCK
-  ioptr->ConfigFlags |= ImGuiConfigFlags_DockingEnable;       // Enable Docking
-  ioptr->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;     // Enable Multi-Viewport / Platform Windows
+  ioptr->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+  ioptr->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 #endif
   igStyleColorsDark(NULL);
   ImGui_ImplRaylib_Init();
@@ -44,12 +46,15 @@ int main(int argc, char **argv)
   rligSetupFontAwesome();
   ImGui_ImplRaylib_BuildFontAtlas();
 
-  particle_c = 1000;
+  particle_c = 2000;
   particles = malloc(sizeof(PARTICLE) * particle_c);
   for (int i = 0; i < particle_c; i++) {
-    particles[i].x = rand()%1000 - 500;
-    particles[i].y = rand()%1000 - 500;
+    particles[i].x = rand()%10000 - 5000;
+    particles[i].y = rand()%10000 - 5000;
   }
+
+  bool draw_quad_tree = false;
+  bool draw_upper = false;
 
   Camera2D cam = { 0 };
   cam.offset = (Vector2){ screenWidth/2.0f, screenHeight/2.0f};
@@ -65,7 +70,13 @@ int main(int argc, char **argv)
     ImGui_ImplRaylib_NewFrame();
     igNewFrame();
 
-    igBegin("lol", NULL, 0); // Create a window called "Hello, world!" and append into it.
+    igBegin("tool bar", NULL, 0); // Create a window called "Hello, world!" and append into it.
+      if (igTreeNode_Str("quad tree")) {
+        igCheckbox("draw quad tree", &draw_quad_tree);
+        if (draw_quad_tree)
+          igCheckbox("draw upper", &draw_upper);
+        igTreePop();
+      }
       igText("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / igGetIO()->Framerate, igGetIO()->Framerate);
     igEnd();
 
@@ -93,7 +104,17 @@ int main(int argc, char **argv)
         for (int i = 0; i < particle_c; i++) {
           DrawCircle(particles[i].x, particles[i].y, 2, WHITE);
         }
-        Draw_quad_tree(&qtree);
+        if (draw_quad_tree) {
+          if (draw_upper) {
+            for (int i = 0; i < upper_c; i++) {
+              DrawRectangleLines(upper[i]->nx, upper[i]->ny,
+                                upper[i]->ex - upper[i]->nx,
+                               upper[i]->ey - upper[i]->ny, DARKGREEN);
+            }
+          }
+          else
+            Draw_quad_tree(&qtree);
+        }
       EndMode2D();
       ImGui_ImplRaylib_RenderDrawData(igGetDrawData());
     EndDrawing();

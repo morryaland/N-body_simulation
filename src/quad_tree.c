@@ -64,7 +64,8 @@ static void quad_tree(QTREE_NODE *parent, QTREE_NODE **node, int depth, int nx, 
   }
   if((**node).mass <= 1){
     //TODO
-    upper_add(node);
+    if((**node).mass == 1) 
+      upper_add(*node);
     //printf("%d %d %d %d\n", nx, ny, ex, ey);
     return;
   }
