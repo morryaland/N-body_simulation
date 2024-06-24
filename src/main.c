@@ -16,8 +16,8 @@ void Draw_quad_tree(QTREE_NODE **node)
   if (!*node)
     return;
   DrawRectangleLines((**node).nx, (**node).ny,
-                    (**node).ex - (**node).nx,
-                   (**node).ey - (**node).ny, DARKGREEN);
+                     (**node).ex - (**node).nx,
+                     (**node).ey - (**node).ny, DARKGREEN);
   Draw_quad_tree(&(**node).a);
   Draw_quad_tree(&(**node).b);
   Draw_quad_tree(&(**node).c);
@@ -46,13 +46,7 @@ int main(int argc, char **argv)
   rligSetupFontAwesome();
   ImGui_ImplRaylib_BuildFontAtlas();
 
-  particle_c = 2000;
-  particles = malloc(sizeof(PARTICLE) * particle_c);
-  for (int i = 0; i < particle_c; i++) {
-    particles[i].x = rand()%10000 - 5000;
-    particles[i].y = rand()%10000 - 5000;
-  }
-
+  bool ig_hovered = false;
   bool draw_quad_tree = false;
   bool draw_upper = false;
 
@@ -70,17 +64,27 @@ int main(int argc, char **argv)
     ImGui_ImplRaylib_NewFrame();
     igNewFrame();
 
-    igBegin("tool bar", NULL, 0); // Create a window called "Hello, world!" and append into it.
-      if (igTreeNode_Str("quad tree")) {
-        igCheckbox("draw quad tree", &draw_quad_tree);
+    igBegin("Tool bar", NULL, 0); // Create a window called "Hello, world!" and append into it.
+      if (igButton("Clean", (ImVec2){ 0 }))
+        particle_clean();
+      if (igTreeNode_Str("Quad tree")) {
+        igCheckbox("Draw quad tree", &draw_quad_tree);
         if (draw_quad_tree)
-          igCheckbox("draw upper", &draw_upper);
+          igCheckbox("Draw upper", &draw_upper);
         igTreePop();
       }
+      igText("Particle count %d", particle_c);
       igText("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / igGetIO()->Framerate, igGetIO()->Framerate);
     igEnd();
 
     igRender();
+
+    if (ig_hovered)
+      goto REND;
+    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+      Vector2 pos = GetScreenToWorld2D(GetMousePosition(), cam);
+      particle_add(pos.x, pos.y);
+    }
 
     if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
       Vector2 delta = GetMouseDelta();
@@ -98,18 +102,19 @@ int main(int argc, char **argv)
       cam.zoom = Clamp(cam.zoom*scaleFactor, 0.125f, 64.0f);
     }
 
+REND:
     BeginDrawing();
       ClearBackground(BLACK);
       BeginMode2D(cam);
         for (int i = 0; i < particle_c; i++) {
-          DrawCircle(particles[i].x, particles[i].y, 2, WHITE);
+          DrawCircle(particles[i].x, particles[i].y, 4, WHITE);
         }
         if (draw_quad_tree) {
           if (draw_upper) {
             for (int i = 0; i < upper_c; i++) {
               DrawRectangleLines(upper[i]->nx, upper[i]->ny,
-                                upper[i]->ex - upper[i]->nx,
-                               upper[i]->ey - upper[i]->ny, DARKGREEN);
+                                 upper[i]->ex - upper[i]->nx,
+                                 upper[i]->ey - upper[i]->ny, DARKGREEN);
             }
           }
           else

@@ -11,7 +11,7 @@ BIN_PATH= ./bin/
 CIMGUI_DIR=cimgui/
 RAYLIB_DIR=raylib/raylib/src/
 
-OBJ=main.o quad_tree.o talloc.o rlcimgui.o
+OBJ=main.o quad_tree.o particle.o talloc.o rlcimgui.o
 LIBRAYLIB=$(LIB_PATH)$(RAYLIB_DIR)libraylib.a
 LIBCIMGUI=$(LIB_PATH)$(CIMGUI_DIR)libcimgui.a
 LIB=$(LIBRAYLIB) $(LIBCIMGUI)

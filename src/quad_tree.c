@@ -7,8 +7,6 @@
 
 #include "include/quad_tree.h"
 
-PARTICLE *particles;
-int particle_c;
 QTREE_NODE *qtree;
 static int upper_i;
 int upper_c;
@@ -58,15 +56,14 @@ static void quad_tree(QTREE_NODE *parent, QTREE_NODE **node, int depth, int nx, 
       (**node).mass++;
     }
   }
-  if (!((**node).mass)) {
+  if (((**node).mass)) {
     (**node).massx /= (**node).mass;
     (**node).massy /= (**node).mass;
   }
-  if((**node).mass <= 1){
-    //TODO
-    if((**node).mass == 1) 
-      upper_add(*node);
-    //printf("%d %d %d %d\n", nx, ny, ex, ey);
+  else
+    return;
+  if((**node).mass == 1) {
+    upper_add(*node);
     return;
   }
   int midx = (nx + ex) >> 1;
@@ -156,12 +153,22 @@ void quad_tree_update()
   }
 }
 
+int quad_tree_rebuild()
+{
+  quad_tree_free();
+  if (quad_tree_init() < 0)
+    return -1;
+  return 0;
+}
+
 int quad_tree_init()
 {
+  if (particle_c < 2)
+    return 0;
   if (!upper)
     upper = malloc(sizeof(QTREE_NODE*));
   upper_c = 0;
-  if (!particles || !particle_c) {
+  if (!particles) {
     puts("ERROR: particles == NULL");
     return -1;
   }

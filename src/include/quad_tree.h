@@ -16,13 +16,16 @@ typedef struct __qtree {
 } QTREE_NODE;
 
 extern QTREE_NODE *qtree;
-extern int upper_c;
 extern QTREE_NODE **upper;
+extern int upper_c;
 
 void quad_tree_update();
+
+int quad_tree_rebuild();
 
 int quad_tree_init();
 
 void quad_tree_free();
+
 
 #endif
