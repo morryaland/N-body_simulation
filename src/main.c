@@ -46,7 +46,7 @@ int main(int argc, char **argv)
   rligSetupFontAwesome();
   ImGui_ImplRaylib_BuildFontAtlas();
 
-  bool ig_hovered = false;
+  bool hovered = false;
   bool draw_quad_tree = false;
   bool draw_upper = false;
 
@@ -67,20 +67,37 @@ int main(int argc, char **argv)
     igBegin("Tool bar", NULL, 0); // Create a window called "Hello, world!" and append into it.
       if (igButton("Clean", (ImVec2){ 0 }))
         particle_clean();
+
       if (igTreeNode_Str("Quad tree")) {
         igCheckbox("Draw quad tree", &draw_quad_tree);
+
         if (draw_quad_tree)
           igCheckbox("Draw upper", &draw_upper);
+
         igTreePop();
       }
       igText("Particle count %d", particle_c);
       igText("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / igGetIO()->Framerate, igGetIO()->Framerate);
+
+      ImVec2 pos, size, mouse;
+      mouse = igGetIO()->MousePos;
+      igGetWindowSize(&size);
+      igGetWindowPos(&pos);
+      size.x += pos.x;
+      size.y += pos.y;
+      if (mouse.x >= pos.x && mouse.y >= pos.y &&
+          mouse.x <= size.x &&
+          mouse.y <= size.y) {
+        hovered = true;
+    } else {
+        hovered = false;
+    }
     igEnd();
 
     igRender();
 
-    if (ig_hovered)
-      goto REND;
+    if (!hovered) {
+
     if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
       Vector2 pos = GetScreenToWorld2D(GetMousePosition(), cam);
       particle_add(pos.x, pos.y);
@@ -102,7 +119,8 @@ int main(int argc, char **argv)
       cam.zoom = Clamp(cam.zoom*scaleFactor, 0.125f, 64.0f);
     }
 
-REND:
+    }
+
     BeginDrawing();
       ClearBackground(BLACK);
       BeginMode2D(cam);
