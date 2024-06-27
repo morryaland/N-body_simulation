@@ -12,6 +12,9 @@ typedef struct {
 } PARTICLE;
 
 int  particle_add(int x, int y);
+
+void particle_move();
+
 void particle_clean();
 
 extern PARTICLE *particles;

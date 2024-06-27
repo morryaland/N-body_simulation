@@ -9,17 +9,14 @@
 
 typedef struct __qtree {
   float massx, massy;
-  int nx, ny, ex, ey;
   int mass;
+  int nx, ny, ex, ey;
   PARTICLE **contpart;
-  struct __qtree *p, *a, *b, *c, *d;
+  struct __qtree *a, *b, *c, *d;
 } QTREE_NODE;
 
 extern QTREE_NODE *qtree;
-extern QTREE_NODE **upper;
-extern int upper_c;
-
-void quad_tree_update();
+extern float theta;
 
 int quad_tree_rebuild();
 

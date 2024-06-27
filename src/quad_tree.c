@@ -8,16 +8,9 @@
 #include "include/quad_tree.h"
 
 QTREE_NODE *qtree;
-static int upper_i;
-int upper_c;
-QTREE_NODE **upper;
+float theta = 1;
 
 static void quad_tree(QTREE_NODE *parent, QTREE_NODE **node, int depth, int nx, int ny, int ex, int ey);
-static void quad_tree_check(QTREE_NODE *node, int depth);
-static void upper_start();
-static QTREE_NODE *upper_next();
-static void upper_add(QTREE_NODE *node);
-static void upper_del(QTREE_NODE *node);
 static int particle_ln();
 
 static void quad_tree(QTREE_NODE *parent, QTREE_NODE **node, int depth, int nx, int ny, int ex, int ey)
@@ -27,7 +20,6 @@ static void quad_tree(QTREE_NODE *parent, QTREE_NODE **node, int depth, int nx, 
   if (!(*node))
     *node = tzalloc(sizeof(QTREE_NODE), parent);
 
-  (**node).p = parent;
   (**node).nx = nx; (**node).ny = ny; (**node).ex = ex; (**node).ey = ey;
   (**node).contpart = talloc(sizeof(PARTICLE*), *node);
 
@@ -60,10 +52,7 @@ static void quad_tree(QTREE_NODE *parent, QTREE_NODE **node, int depth, int nx, 
     (**node).massx /= (**node).mass;
     (**node).massy /= (**node).mass;
   }
-  else
-    return;
-  if((**node).mass == 1) {
-    upper_add(*node);
+  if((**node).mass <= 1) {
     return;
   }
   int midx = (nx + ex) >> 1;
@@ -93,66 +82,6 @@ static int particle_ln()
   return res;
 }
 
-static void quad_tree_check(QTREE_NODE *node, int depth)
-{
-  for (int i = 0; i < node->mass; i++) {
-    if (!(node->contpart[i]->x < node->ex && node->contpart[i]->y < node->ey &&
-          node->contpart[i]->x > node->nx && node->contpart[i]->y > node->ny)) {
-      if (!depth)
-        upper_del(node);
-      quad_tree_check(node->p, depth + 1);
-    }
-  }
-  if (depth && node->p) {
-    tfree(node);
-    quad_tree(node->p, NULL, depth, node->nx, node->ny, node->ex, node->ey);
-  }
-}
-
-static void upper_start()
-{
-  upper_i = 0;
-}
-
-static QTREE_NODE *upper_next()
-{
-  if (upper_i >= upper_c)
-    return NULL;
-  QTREE_NODE *node = upper[upper_i];
-  upper_i++;
-  return node;
-}
-
-static void upper_add(QTREE_NODE *node)
-{
-  upper = realloc(upper, sizeof(QTREE_NODE*) * (upper_c + 1));
-  upper[upper_c] = node;
-  upper_c++;
-}
-
-static void upper_del(QTREE_NODE *node)
-{
-  for (int i = 0; i < upper_c; i++) {
-    if (upper[i]->nx == node->nx && upper[i]->ny == node->ny && upper[i]->ex == node->ex && upper[i]->ey == node->ey) {
-      upper_c--;
-      for (int j = i; j < upper_c; j++) {
-        upper[j] = upper[j + 1];
-      }
-      upper = realloc(upper, sizeof(QTREE_NODE*) * (upper_c));
-      break;
-    }
-  }
-}
-
-void quad_tree_update()
-{
-  upper_start();
-  QTREE_NODE *node = NULL;
-  while ((node = upper_next())) {
-    quad_tree_check(node, 0);
-  }
-}
-
 int quad_tree_rebuild()
 {
   quad_tree_free();
@@ -165,9 +94,6 @@ int quad_tree_init()
 {
   if (particle_c < 2)
     return 0;
-  if (!upper)
-    upper = malloc(sizeof(QTREE_NODE*));
-  upper_c = 0;
   if (!particles) {
     puts("ERROR: particles == NULL");
     return -1;
@@ -190,10 +116,5 @@ void quad_tree_free()
   if (qtree) {
     tfree(qtree);
     qtree = NULL;
-  }
-  if (upper) {
-    free(upper);
-    upper = NULL;
-    upper_c = 0;
   }
 }

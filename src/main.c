@@ -1,9 +1,10 @@
 /* AUTHOR: muly / morryaland
  * See file LICENSE for full license details.*/
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
+#include <stdbool.h>
 
 #include "../lib/raylib/raylib/src/raylib.h"
 #include "../lib/raylib/raylib/src/raymath.h"
@@ -11,17 +12,25 @@
 #include "../lib/raylib/rlcimgui.h"
 #include "include/quad_tree.h"
 
-void Draw_quad_tree(QTREE_NODE **node)
+static bool draw_upper;
+
+void Draw_quad_tree(QTREE_NODE *node)
 {
-  if (!*node)
+  if (!node)
     return;
-  DrawRectangleLines((**node).nx, (**node).ny,
-                     (**node).ex - (**node).nx,
-                     (**node).ey - (**node).ny, DARKGREEN);
-  Draw_quad_tree(&(**node).a);
-  Draw_quad_tree(&(**node).b);
-  Draw_quad_tree(&(**node).c);
-  Draw_quad_tree(&(**node).d);
+  if (node->a || node->b || node->c || node->d) {
+    Draw_quad_tree(node->a);
+    Draw_quad_tree(node->b);
+    Draw_quad_tree(node->c);
+    Draw_quad_tree(node->d);
+  }
+  else {
+    if (draw_upper && !node->mass)
+      return;
+    DrawRectangleLines(node->nx, node->ny,
+                       node->ex - node->nx,
+                       node->ey - node->ny, DARKGREEN);
+  }
 }
 
 int main(int argc, char **argv)
@@ -48,7 +57,6 @@ int main(int argc, char **argv)
 
   bool hovered = false;
   bool draw_quad_tree = false;
-  bool draw_upper = false;
 
   Camera2D cam = { 0 };
   cam.offset = (Vector2){ screenWidth/2.0f, screenHeight/2.0f};
@@ -58,7 +66,8 @@ int main(int argc, char **argv)
   quad_tree_init();
   while(!WindowShouldClose())
   {
-    quad_tree_update();
+    quad_tree_rebuild();
+    particle_move();
 
     ImGui_ImplRaylib_ProcessEvents();
     ImGui_ImplRaylib_NewFrame();
@@ -68,14 +77,10 @@ int main(int argc, char **argv)
       if (igButton("Clean", (ImVec2){ 0 }))
         particle_clean();
 
-      if (igTreeNode_Str("Quad tree")) {
-        igCheckbox("Draw quad tree", &draw_quad_tree);
-
-        if (draw_quad_tree)
-          igCheckbox("Draw upper", &draw_upper);
-
-        igTreePop();
-      }
+      igCheckbox("Draw quad tree", &draw_quad_tree);
+      if (draw_quad_tree)
+        igCheckbox("Draw upper", &draw_upper);
+      igSliderFloat("theta", &theta, 0, 5, "%.3f", 0);
       igText("Particle count %d", particle_c);
       igText("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / igGetIO()->Framerate, igGetIO()->Framerate);
 
@@ -98,7 +103,7 @@ int main(int argc, char **argv)
 
     if (!hovered) {
 
-    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
       Vector2 pos = GetScreenToWorld2D(GetMousePosition(), cam);
       particle_add(pos.x, pos.y);
     }
@@ -128,15 +133,7 @@ int main(int argc, char **argv)
           DrawCircle(particles[i].x, particles[i].y, 4, WHITE);
         }
         if (draw_quad_tree) {
-          if (draw_upper) {
-            for (int i = 0; i < upper_c; i++) {
-              DrawRectangleLines(upper[i]->nx, upper[i]->ny,
-                                 upper[i]->ex - upper[i]->nx,
-                                 upper[i]->ey - upper[i]->ny, DARKGREEN);
-            }
-          }
-          else
-            Draw_quad_tree(&qtree);
+          Draw_quad_tree(qtree);
         }
       EndMode2D();
       ImGui_ImplRaylib_RenderDrawData(igGetDrawData());
