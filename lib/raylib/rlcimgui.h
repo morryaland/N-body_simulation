@@ -7,7 +7,7 @@
 *
 **********************************************************************************************/
 
-#include "raylib/src/raylib.h"
+#include "raylib.h"
 
 #ifndef NO_FONT_AWESOME
     #include "extras/FA6FreeSolidFontData.h"
@@ -88,7 +88,6 @@ void rligBeginDelta(float deltaTime);
  * Draw a portion texture as an image in an ImGui Context at a defined size
  * Uses the current ImGui Cursor position and the specified size
  * The image will be scaled up or down to fit as needed
- *
  * @param image The raylib texture to draw
  * @param destWidth The width of the drawn image
  * @param destHeight The height of the drawn image

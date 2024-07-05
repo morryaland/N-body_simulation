@@ -5,20 +5,20 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "include/quad_tree.h"
-#include "include/particle.h"
+#include "quad_tree.h"
+#include "particle.h"
 
-PARTICLE *particles;
+particle_t *particles;
 int particle_c;
 
 static int count;
 static float *distance;
-static QTREE_NODE **out;
-static PARTICLE **particle;
+static qtree_node_t **out;
+static particle_t **particle;
 
-static void distancef(QTREE_NODE *node);
+static void distancef(qtree_node_t *node);
 
-static void distancef(QTREE_NODE *node)
+static void distancef(qtree_node_t *node)
 {
   float x = (node->massx - (**particle).x) * (node->massx - (**particle).x);
   float y = (node->massy - (**particle).y) * (node->massy - (**particle).y);
@@ -37,7 +37,7 @@ static void distancef(QTREE_NODE *node)
   else {
     distance = realloc(distance, sizeof(float) * (count + 1));
     distance[count] = d;
-    out = realloc(out, sizeof(QTREE_NODE*) * (count + 1));
+    out = realloc(out, sizeof(qtree_node_t*) * (count + 1));
     out[count] = node;
     count++;
   }
@@ -45,7 +45,7 @@ static void distancef(QTREE_NODE *node)
 
 int particle_add(int x, int y)
 {
-  particles = realloc(particles, sizeof(PARTICLE) * (particle_c + 1));
+  particles = realloc(particles, sizeof(particle_t) * (particle_c + 1));
   if (!particles)
     return -1;
   particles[particle_c].x = x;
@@ -63,7 +63,7 @@ void particle_move()
     return;
   for (int i = 0; i < particle_c; i++) {
     count = 0;
-    particle = malloc(sizeof(PARTICLE*));
+    particle = malloc(sizeof(particle_t*));
     *particle = particles + i;
     distancef(qtree);
     float acx = 0;
@@ -90,5 +90,4 @@ void particle_clean()
   free(particles);
   particles = NULL;
   particle_c = 0;
-  quad_tree_rebuild();
 }

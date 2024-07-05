@@ -5,30 +5,30 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "include/quad_tree.h"
+#include "quad_tree.h"
 
-QTREE_NODE *qtree;
+qtree_node_t *qtree;
 float theta = 1;
 
-static void quad_tree(QTREE_NODE *parent, QTREE_NODE **node, int depth, int nx, int ny, int ex, int ey);
+static void quad_tree(qtree_node_t *parent, qtree_node_t **node, int depth, int nx, int ny, int ex, int ey);
 static int particle_ln();
 
-static void quad_tree(QTREE_NODE *parent, QTREE_NODE **node, int depth, int nx, int ny, int ex, int ey)
+static void quad_tree(qtree_node_t *parent, qtree_node_t **node, int depth, int nx, int ny, int ex, int ey)
 {
   if (!depth)
     return;
   if (!(*node))
-    *node = tzalloc(sizeof(QTREE_NODE), parent);
+    *node = tzalloc(sizeof(qtree_node_t), parent);
 
   (**node).nx = nx; (**node).ny = ny; (**node).ex = ex; (**node).ey = ey;
-  (**node).contpart = talloc(sizeof(PARTICLE*), *node);
+  (**node).contpart = talloc(sizeof(particle_t*), *node);
 
   int cont_c;
-  PARTICLE **part;
+  particle_t **part;
 
   if (!parent) {
     cont_c = particle_c;
-    part = talloc(sizeof(PARTICLE*) * cont_c, *node);
+    part = talloc(sizeof(particle_t*) * cont_c, *node);
     for (int i = 0; i < cont_c; i++) {
       part[i] = particles + i;
     }
@@ -41,7 +41,7 @@ static void quad_tree(QTREE_NODE *parent, QTREE_NODE **node, int depth, int nx, 
   for (int i = 0; i < cont_c; i++) {
     if (part[i]->x < ex && part[i]->y < ey &&
         part[i]->x > nx && part[i]->y > ny) {
-      (**node).contpart = trealloc((**node).contpart, sizeof(PARTICLE*) * ((**node).mass + 1));
+      (**node).contpart = trealloc((**node).contpart, sizeof(particle_t*) * ((**node).mass + 1));
       (**node).contpart[(**node).mass] = part[i];
       (**node).massx += particles[i].x;
       (**node).massy += particles[i].y;

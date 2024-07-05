@@ -1,21 +1,21 @@
 /* AUTHOR: muly / morryaland
  * See file LICENSE for full license details.*/
 
-#ifndef QUAD_TREE_H
-#define QUAD_TREE_H
+#ifndef _QUAD_TREE_H_
+#define _QUAD_TREE_H_
 
-#include "../../lib/talloc/talloc.h"
+#include "talloc.h"
 #include "particle.h"
 
 typedef struct __qtree {
   float massx, massy;
   int mass;
   int nx, ny, ex, ey;
-  PARTICLE **contpart;
+  particle_t **contpart;
   struct __qtree *a, *b, *c, *d;
-} QTREE_NODE;
+} qtree_node_t;
 
-extern QTREE_NODE *qtree;
+extern qtree_node_t *qtree;
 extern float theta;
 
 int quad_tree_rebuild();
@@ -23,6 +23,5 @@ int quad_tree_rebuild();
 int quad_tree_init();
 
 void quad_tree_free();
-
 
 #endif
