@@ -22,13 +22,13 @@ mac_raylib_path="./lib/macos/libraylib.a"
 
 case "${host_os}" in
     linux*)
-        AC_CHECK_FILE($linux_raylib_path, LIBS=$linux_raylib_path)
+        LIBS=$linux_raylib_path
         ;;
     cygwin*|mingw*)
-        AC_CHECK_FILES($win_raylib_path, LIBS=$win_raylib_path)
+        LIBS=$win_raylib_path
         ;;
     darwin*)
-        AC_CHECK_FILE($mac_raylib_path, LIBS=$mac_raylib_path)
+        LIBS=$mac_raylib_path
         ;;
     *)
         AC_MSG_ERROR(["OS $host_os is not supported"])

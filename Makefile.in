@@ -35,5 +35,5 @@ $(LIBCIMGUI) :
 
 clean :
 	make -C $(LIB_PATH)/$(CIMGUI_DIR) clean
-	rm -fr $(OBJ_PATH)*.o
+	rm -fr $(OBJ_PATH)/*.o $(LIBCIMGUI)
 	rm $(TARGET)
