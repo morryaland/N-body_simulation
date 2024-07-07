@@ -16,7 +16,7 @@ OBJS = $(patsubst $(SRC_PATH)/%.c, $(OBJ_PATH)/%.o,$(SRCS))
 LIBCIMGUI = $(LIB_PATH)/$(CIMGUI_DIR)/libcimgui.a
 LIB=$(LIBRAYLIB) $(LIBCIMGUI)
 
-LDFLAGS+= -lm -lstdc++ @LDFLAGS@ @LIBS@
+LDFLAGS+= -lm -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -lpthread -Wl,-Bdynamic @LDFLAGS@ @LIBS@
 CFLAGS+= -I./lib/include/ @CFLAGS@
 
 .PHONY: all create_folders
