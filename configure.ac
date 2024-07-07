@@ -1,4 +1,4 @@
-AC_INIT([nbody],[0.1])
+AC_INIT([nbody],[0.2])
 AC_CONFIG_SRCDIR(src/main.c)
 
 AC_PROG_CC
