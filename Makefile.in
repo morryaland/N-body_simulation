@@ -1,23 +1,21 @@
 TARGET = @PACKAGE_NAME@@EXEEXT@
 CC = @CC@
-MKDIR = mkdir -p
+MKDIR = @MKDIR_P@
 
 SRC_PATH = src
 LIB_PATH = lib
 OBJ_PATH = obj
 
 CIMGUI_DIR = cimgui
-RAYLIB_DIR = raylib/raylib/src
 
 SRCS = $(wildcard $(SRC_PATH)/*.c)
 OBJS = $(patsubst $(SRC_PATH)/%.c, $(OBJ_PATH)/%.o,$(SRCS))
 
-LIBRAYLIB = $(LIB_PATH)/$(RAYLIB_DIR)/libraylib.a
 LIBCIMGUI = $(LIB_PATH)/$(CIMGUI_DIR)/libcimgui.a
-LIB=$(LIBRAYLIB) $(LIBCIMGUI)
+LIB=$(LIBRAYLIB) $(LIBCIMGUI) @LIBS@
 
 LDFLAGS+= -lm -lstdc++ @LDFLAGS@
-CFLAGS+= @CFLAGS@
+CFLAGS+= -I./lib/include/ @CFLAGS@
 
 .PHONY: all create_folders
 
@@ -35,11 +33,7 @@ $(OBJ_PATH)/%.o : $(SRC_PATH)/%.c
 $(LIBCIMGUI) :
 	$(MAKE) -C $(LIB_PATH)/$(CIMGUI_DIR) CXXFLAGS="-O1 -std=c++11 -DIMGUI_DISABLE_OBSOLETE_KEYIO=1" static
 
-$(LIBRAYLIB) :
-	$(MAKE) -C $(LIB_PATH)/$(RAYLIB_DIR)
-
 clean :
 	make -C $(LIB_PATH)/$(CIMGUI_DIR) clean
-	make -C $(LIB_PATH)/$(RAYLIB_DIR) clean
 	rm -fr $(OBJ_PATH)*.o $(LIB)
 	rm $(TARGET)

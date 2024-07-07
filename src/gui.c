@@ -125,6 +125,10 @@ void get_input()
     if (wheel < 0) scaleFactor = 1.0f/scaleFactor;
     cam.zoom = Clamp(cam.zoom*scaleFactor, 0.125f, 64.0f);
   }
+  if (cam.zoom > 3)
+    cam.zoom = 3;
+  else if (cam.zoom < 0.2)
+    cam.zoom = 0.2;
 }
 
 void draw_quad_tree(qtree_node_t *node)
@@ -140,8 +144,9 @@ void draw_quad_tree(qtree_node_t *node)
   else {
     if (draw_upper && !node->mass)
       return;
-    DrawRectangleLines(node->nx, node->ny,
-                       node->ex - node->nx,
-                       node->ey - node->ny, DARKGREEN);
+    DrawLine(node->nx, node->ny, node->ex, node->ny, DARKGREEN);
+    DrawLine(node->nx, node->ny, node->nx, node->ey, DARKGREEN);
+    DrawLine(node->nx, node->ey, node->ex, node->ey, DARKGREEN);
+    DrawLine(node->ex, node->ny, node->ex, node->ey, DARKGREEN);
   }
 }

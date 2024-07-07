@@ -6,8 +6,8 @@
 
 #include "raylib.h"
 #include "raymath.h"
-#include "../lib/raylib/imgui_impl_raylib.h"
-#include "../lib/raylib/rlcimgui.h"
+#include "imgui_impl_raylib.h"
+#include "rlcimgui.h"
 #include "quad_tree.h"
 
 void init_raylib();
