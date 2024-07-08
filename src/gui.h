@@ -4,10 +4,10 @@
 #ifndef _GUI_H_
 #define _GUI_H_
 
-#include "raylib.h"
-#include "raymath.h"
-#include "imgui_impl_raylib.h"
-#include "rlcimgui.h"
+#include "../lib/include/raylib.h"
+#include "../lib/include/raymath.h"
+#include "../lib/include/imgui_impl_raylib.h"
+#include "../lib/include/rlcimgui.h"
 #include "quad_tree.h"
 
 void init_raylib();

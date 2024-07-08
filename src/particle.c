@@ -10,6 +10,7 @@
 
 particle_t *particles;
 int particle_c;
+float gravity = 0;
 
 static int count;
 static float *distance;
@@ -20,9 +21,9 @@ static void distancef(qtree_node_t *node);
 
 static void distancef(qtree_node_t *node)
 {
-  float x = (node->massx - (**particle).x) * (node->massx - (**particle).x);
-  float y = (node->massy - (**particle).y) * (node->massy - (**particle).y);
-  float d = sqrt(x + y);
+  float x = (node->massx - (**particle).x);
+  float y = (node->massy - (**particle).y);
+  float d = sqrtf(x * x + y * y);
   if (isnan(d))
     return;
   if (d < 10)
@@ -68,10 +69,18 @@ void particle_move()
     distancef(qtree);
     float acx = 0;
     float acy = 0;
+    if (gravity) {
+      float d = sqrtf((**particle).x * (**particle).x + (**particle).y * (**particle).y);
+      if (!isnan(d) && d > 10) {
+        float aot = 1.0f / (d * d);
+        acx = -(**particle).x * aot * gravity;
+        acy = -(**particle).y * aot * gravity;
+      }
+    }
     for (int j = 0; j < count; j++) {
       float aot = (out[j]->mass) / (distance[j] * distance[j]);
-      acx += aot * ((out[j]->massx - (**particle).x) / distance[j]);
-      acy += aot * ((out[j]->massy - (**particle).y) / distance[j]);
+      acx += aot * (out[j]->massx - (**particle).x);
+      acy += aot * (out[j]->massy - (**particle).y);
     }
     (**particle).speedx += acx;
     (**particle).speedy += acy;

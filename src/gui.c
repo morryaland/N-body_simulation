@@ -19,6 +19,8 @@ static Camera2D cam = {
   .zoom = 1.0f
 };
 
+static void window_is_hovered();
+
 void init_raylib()
 {
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
@@ -49,32 +51,52 @@ void draw_imgui()
   ImGui_ImplRaylib_NewFrame();
   igNewFrame();
 
-  igBegin("Tool bar", NULL, 0);
+  igSetNextWindowSize((ImVec2){ 400, 160 }, ImGuiCond_FirstUseEver);
+  if(!igBegin("Tool Bar", NULL, 0)) {
+    igEnd();
+    return;
+  }
+
+  igBeginTabBar("Tab Bar", 0);
+  if(igBeginTabItem("Simulation", NULL, 0)) {
+    igSliderFloat("theta", &theta, 0, 5, "%.3f", 0);
+    igDragFloat("Gravity", &gravity, 0.01, 0, 100, "%.3f", 0);
+    igCheckbox("Draw quad tree ", &draw_qtree);
+    if (draw_qtree) {
+      igSameLine(0, 0);
+      igCheckbox("Draw upper", &draw_upper);
+    }
+    igText("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / igGetIO()->Framerate, igGetIO()->Framerate);
+    igEndTabItem();
+  }
+  if(igBeginTabItem("Particle Editor", NULL, 0)) {
     if (igButton("Clean", (ImVec2){ 0 }))
       particle_clean();
-
-    igCheckbox("Draw quad tree", &draw_qtree);
-    if (draw_qtree)
-      igCheckbox("Draw upper", &draw_upper);
-    igSliderFloat("theta", &theta, 0, 5, "%.3f", 0);
     igText("Particle count %d", particle_c);
-    igText("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / igGetIO()->Framerate, igGetIO()->Framerate);
+    igEndTabItem();
+  }
+  igEndTabBar();
 
-    ImVec2 pos, size, mouse;
-    mouse = igGetIO()->MousePos;
-    igGetWindowSize(&size);
-    igGetWindowPos(&pos);
-    size.x += pos.x;
-    size.y += pos.y;
-    if (mouse.x >= pos.x && mouse.y >= pos.y &&
-      mouse.x <= size.x && mouse.y <= size.y) {
-      hovered = true;
-    } else {
-      hovered = false;
-    }
+  window_is_hovered();
   igEnd();
 
   igRender();
+}
+
+void window_is_hovered()
+{
+  ImVec2 pos, size, mouse;
+  mouse = igGetIO()->MousePos;
+  igGetWindowSize(&size);
+  igGetWindowPos(&pos);
+  size.x += pos.x;
+  size.y += pos.y;
+  if (mouse.x >= pos.x && mouse.y >= pos.y &&
+    mouse.x <= size.x && mouse.y <= size.y) {
+    hovered = true;
+  } else {
+    hovered = false;
+  }
 }
 
 void draw_window()

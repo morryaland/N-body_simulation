@@ -8,7 +8,7 @@
 #include "quad_tree.h"
 
 qtree_node_t *qtree;
-float theta = 1;
+float theta = 0.5f;
 
 static void quad_tree(qtree_node_t *parent, qtree_node_t **node, int depth, int nx, int ny, int ex, int ey);
 static int particle_ln();
@@ -66,20 +66,17 @@ static void quad_tree(qtree_node_t *parent, qtree_node_t **node, int depth, int 
 
 static int particle_ln()
 {
-  int res = -1;
-  double max = fabs(particles[0].x);
+  float max = 0;
   for (int i = 0; i < particle_c; i++) {
-    if (fabs(particles[i].x) > max) {
-      max = fabs(particles[i].x);
-    }
-    if (fabs(particles[i].y) > max) {
-      max = fabs(particles[i].y);
-    }
+    int x = fabsf(particles[i].x), y = fabsf(particles[i].y);
+    if (x > max)
+      max = x;
+    if (y > max)
+      max = y;
   }
   if (!(int)max)
     return -1;
-  res = (int)log2(max) + 1;
-  return res;
+  return (int)log2f(max) + 1;
 }
 
 int quad_tree_rebuild()

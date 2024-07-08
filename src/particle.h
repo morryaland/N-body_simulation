@@ -19,5 +19,6 @@ void particle_clean();
 
 extern particle_t *particles;
 extern int particle_c;
+extern float gravity;
 
 #endif

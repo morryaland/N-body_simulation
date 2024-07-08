@@ -1,4 +1,4 @@
-TARGET = @PACKAGE_NAME@@EXEEXT@
+TARGET = @PACKAGE_NAME@-@OS@@EXEEXT@
 CC = @CC@
 CXX = @CXX@
 OS = @OS@
@@ -17,7 +17,7 @@ LIBCIMGUI = $(LIB_PATH)/$(CIMGUI_DIR)/libcimgui.a
 LIB=$(LIBRAYLIB) $(LIBCIMGUI)
 
 LDFLAGS+= -lm -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -lpthread -Wl,-Bdynamic @LDFLAGS@ @LIBS@
-CFLAGS+= -I./lib/include/ @CFLAGS@
+CFLAGS+= @CFLAGS@
 
 .PHONY: all create_folders
 
