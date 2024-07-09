@@ -10,6 +10,8 @@
 #include "../lib/include/rlcimgui.h"
 #include "quad_tree.h"
 
+extern unsigned int sim_speed;
+
 void init_raylib();
 
 void init_cimgui();

@@ -9,6 +9,8 @@
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
 
+unsigned int sim_speed;
+
 static bool hovered;
 static bool draw_qtree;
 static bool draw_upper;
@@ -25,7 +27,6 @@ void init_raylib()
 {
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, PACKAGE_STRING);
-  SetTargetFPS(60);
 }
 
 void init_cimgui()
@@ -51,7 +52,7 @@ void draw_imgui()
   ImGui_ImplRaylib_NewFrame();
   igNewFrame();
 
-  igSetNextWindowSize((ImVec2){ 400, 160 }, ImGuiCond_FirstUseEver);
+  igSetNextWindowSize((ImVec2){ 400, 180 }, ImGuiCond_FirstUseEver);
   if(!igBegin("Tool Bar", NULL, 0)) {
     igEnd();
     return;
@@ -60,18 +61,21 @@ void draw_imgui()
   igBeginTabBar("Tab Bar", 0);
   if(igBeginTabItem("Simulation", NULL, 0)) {
     igSliderFloat("theta", &theta, 0, 5, "%.3f", 0);
-    igDragFloat("Gravity", &gravity, 0.01, 0, 100, "%.3f", 0);
+    igDragFloat("gravity", &gravity, 0.01, 0, 100, "%.3f", 0);
+    igDragFloat("time ms", &time_ms, 0.01, 0, 100, "%.3f", 0);
     igCheckbox("Draw quad tree ", &draw_qtree);
     if (draw_qtree) {
       igSameLine(0, 0);
       igCheckbox("Draw upper", &draw_upper);
     }
-    igText("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / igGetIO()->Framerate, igGetIO()->Framerate);
+    igText("Simulation average %.3f ms", sim_speed / 1000.0f);
+    igText("Application average %.3f ms", 1000.0f / igGetIO()->Framerate);
     igEndTabItem();
   }
   if(igBeginTabItem("Particle Editor", NULL, 0)) {
     if (igButton("Clean", (ImVec2){ 0 }))
       particle_clean();
+
     igText("Particle count %d", particle_c);
     igEndTabItem();
   }
@@ -108,7 +112,9 @@ void draw_window()
         DrawCircle(particles[i].x, particles[i].y, 4, WHITE);
       }
       if (draw_qtree) {
+        pthread_mutex_lock(&sim_mutex);
         draw_quad_tree(qtree);
+        pthread_mutex_unlock(&sim_mutex);
       }
     EndMode2D();
     ImGui_ImplRaylib_RenderDrawData(igGetDrawData());

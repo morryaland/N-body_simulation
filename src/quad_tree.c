@@ -66,7 +66,7 @@ static void quad_tree(qtree_node_t *parent, qtree_node_t **node, int depth, int 
 
 static int particle_ln()
 {
-  float max = 0;
+  float max = 2;
   for (int i = 0; i < particle_c; i++) {
     int x = fabsf(particles[i].x), y = fabsf(particles[i].y);
     if (x > max)
@@ -89,7 +89,7 @@ int quad_tree_rebuild()
 
 int quad_tree_init()
 {
-  if (particle_c < 2)
+  if (particle_c < 1)
     return 0;
   if (!particles) {
     puts("ERROR: particles == NULL");

@@ -11,6 +11,7 @@
 particle_t *particles;
 int particle_c;
 float gravity = 0;
+float time_ms = 20;
 
 static int count;
 static float *distance;
@@ -46,6 +47,7 @@ static void distancef(qtree_node_t *node)
 
 int particle_add(int x, int y)
 {
+  pthread_mutex_lock(&sim_mutex);
   particles = realloc(particles, sizeof(particle_t) * (particle_c + 1));
   if (!particles)
     return -1;
@@ -55,12 +57,13 @@ int particle_add(int x, int y)
   particles[particle_c].speedy = 0;
   particle_c++;
   quad_tree_rebuild();
+  pthread_mutex_unlock(&sim_mutex);
   return 0;
 }
 
 void particle_move()
 {
-  if (particle_c < 2)
+  if (particle_c < 1)
     return;
   for (int i = 0; i < particle_c; i++) {
     count = 0;
@@ -72,9 +75,9 @@ void particle_move()
     if (gravity) {
       float d = sqrtf((**particle).x * (**particle).x + (**particle).y * (**particle).y);
       if (!isnan(d) && d > 10) {
-        float aot = 1.0f / (d * d);
-        acx = -(**particle).x * aot * gravity;
-        acy = -(**particle).y * aot * gravity;
+        float aot = particle_c * gravity / (d * d);
+        acx = -(**particle).x * aot;
+        acy = -(**particle).y * aot;
       }
     }
     for (int j = 0; j < count; j++) {
@@ -96,7 +99,9 @@ void particle_move()
 
 void particle_clean()
 {
+  pthread_mutex_lock(&sim_mutex);
   free(particles);
   particles = NULL;
   particle_c = 0;
+  pthread_mutex_unlock(&sim_mutex);
 }

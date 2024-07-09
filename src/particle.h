@@ -4,6 +4,8 @@
 #ifndef _PARTICLE_H_
 #define _PARTICLE_H_
 
+#include <pthread.h>
+
 typedef struct {
   float x;
   float y;
@@ -17,8 +19,10 @@ void particle_move();
 
 void particle_clean();
 
+extern pthread_mutex_t sim_mutex;
 extern particle_t *particles;
 extern int particle_c;
 extern float gravity;
+extern float time_ms;
 
 #endif
