@@ -9,20 +9,24 @@
 
 pthread_mutex_t sim_mutex;
 
-static bool open = true;
+static bool window_open = true;
 
 static void *thread_func(void*);
 
 static void *thread_func(void* arg)
 {
-  while(open) {
+  while(window_open) {
     pthread_mutex_lock(&sim_mutex);
     clock_t bef = clock();
     quad_tree_rebuild();
     particle_move();
     pthread_mutex_unlock(&sim_mutex);
     usleep(10);
-    sim_speed = ((clock() - bef));
+    #ifdef __WIN32
+    sim_speed = (clock() - bef) * 100;
+    #else
+    sim_speed = (clock() - bef);
+    #endif
     if (sim_speed < time_ms * 1000)
       usleep(time_ms * 1000 - sim_speed);
   }
@@ -39,7 +43,7 @@ int main(int argc, char **argv)
   pthread_t thread;
   pthread_create(&thread, NULL, thread_func, NULL);
 
-  while(open)
+  while(window_open)
   {
     draw_imgui();
 
@@ -47,7 +51,7 @@ int main(int argc, char **argv)
 
     draw_window();
 
-    open = !WindowShouldClose();
+    window_open = !WindowShouldClose();
   }
   pthread_join(thread, NULL);
   pthread_mutex_destroy(&sim_mutex);

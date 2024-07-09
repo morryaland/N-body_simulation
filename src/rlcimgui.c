@@ -1,9 +1,9 @@
 #include <math.h>
 #include <string.h>
 
-#include "imgui_impl_raylib.h"
-#include "rlcimgui.h"
-#include "rlgl.h"
+#include "../lib/include/imgui_impl_raylib.h"
+#include "../lib/include/rlcimgui.h"
+#include "../lib/include/rlgl.h"
 
 #define FLT_MAX 3.402823466e+38F
 
