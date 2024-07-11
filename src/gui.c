@@ -133,6 +133,11 @@ void get_input()
   if (hovered)
     return;
 
+  if (IsKeyDown(KEY_ONE)) {
+    Vector2 pos = GetScreenToWorld2D(GetMousePosition(), cam);
+    particle_add(pos.x, pos.y);
+  }
+
   if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
     Vector2 pos = GetScreenToWorld2D(GetMousePosition(), cam);
     particle_add(pos.x, pos.y);

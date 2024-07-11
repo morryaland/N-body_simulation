@@ -7,6 +7,8 @@
 #include "talloc.h"
 #include "particle.h"
 
+#define THREAD_DEPTH 4
+
 typedef struct __qtree {
   float massx, massy;
   int mass;
