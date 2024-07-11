@@ -10,25 +10,25 @@
 qtree_node_t *qtree;
 float theta = 0.5f;
 
-static void quad_tree(qtree_node_t *parent, qtree_node_t **node, int depth, int nx, int ny, int ex, int ey);
+static qtree_node_t *quad_tree(qtree_node_t *parent, int nx, int ny, int ex, int ey);
 static int particle_ln();
 
-static void quad_tree(qtree_node_t *parent, qtree_node_t **node, int depth, int nx, int ny, int ex, int ey)
+static qtree_node_t *quad_tree(qtree_node_t *parent, int nx, int ny, int ex, int ey)
 {
-  if (!depth)
-    return;
-  if (!(*node))
-    *node = tzalloc(sizeof(qtree_node_t), parent);
+  if (ex - nx == 1)
+    return NULL;
 
-  (**node).nx = nx; (**node).ny = ny; (**node).ex = ex; (**node).ey = ey;
-  (**node).contpart = talloc(sizeof(particle_t*), *node);
+  qtree_node_t *node = tzalloc(sizeof(qtree_node_t), parent);
+
+  node->nx = nx; node->ny = ny; node->ex = ex; node->ey = ey;
+  node->contpart = talloc(sizeof(particle_t*), node);
 
   int cont_c;
   particle_t **part;
 
   if (!parent) {
     cont_c = particle_c;
-    part = talloc(sizeof(particle_t*) * cont_c, *node);
+    part = talloc(sizeof(particle_t*) * cont_c, node);
     for (int i = 0; i < cont_c; i++) {
       part[i] = particles + i;
     }
@@ -41,27 +41,27 @@ static void quad_tree(qtree_node_t *parent, qtree_node_t **node, int depth, int 
   for (int i = 0; i < cont_c; i++) {
     if (part[i]->x < ex && part[i]->y < ey &&
         part[i]->x > nx && part[i]->y > ny) {
-      (**node).contpart = trealloc((**node).contpart, sizeof(particle_t*) * ((**node).mass + 1));
-      (**node).contpart[(**node).mass] = part[i];
-      (**node).massx += particles[i].x;
-      (**node).massy += particles[i].y;
-      (**node).mass++;
+      node->contpart = trealloc(node->contpart, sizeof(particle_t*) * (node->mass + 1));
+      node->contpart[node->mass] = part[i];
+      node->massx += particles[i].x;
+      node->massy += particles[i].y;
+      node->mass++;
     }
   }
-  if (((**node).mass)) {
-    (**node).massx /= (**node).mass;
-    (**node).massy /= (**node).mass;
+  if (node->mass) {
+    node->massx /= node->mass;
+    node->massy /= node->mass;
   }
-  if((**node).mass <= 1) {
-    return;
+  if(node->mass <= 1) {
+    return node;
   }
   int midx = (nx + ex) >> 1;
   int midy = (ny + ey) >> 1;
-  depth--;
-  quad_tree(*node, &(**node).a, depth, nx, ny, midx, midy);
-  quad_tree(*node, &(**node).b, depth, midx, ny, ex, midy);
-  quad_tree(*node, &(**node).c, depth, midx, midy, ex, ey);
-  quad_tree(*node, &(**node).d, depth, nx, midy, midx, ey);
+  node->a = quad_tree(node, nx, ny, midx, midy);
+  node->b = quad_tree(node, midx, ny, ex, midy);
+  node->c = quad_tree(node, midx, midy, ex, ey);
+  node->d = quad_tree(node, nx, midy, midx, ey);
+  return node;
 }
 
 static int particle_ln()
@@ -102,9 +102,9 @@ int quad_tree_init()
     return -1;
   }
 
-  int bord = (int)(powf(2, depth) + 0.5f);
+  int bord = 1 << depth;
 
-  quad_tree(NULL, &qtree, depth, -bord, -bord, bord, bord);
+  qtree = quad_tree(NULL, -bord, -bord, bord, bord);
   return 0;
 }
 
