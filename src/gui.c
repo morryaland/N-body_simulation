@@ -60,6 +60,7 @@ void draw_imgui()
 
   igBeginTabBar("Tab Bar", 0);
   if(igBeginTabItem("Simulation", NULL, 0)) {
+    igSliderInt("thread depth", &thread_depth, 0, 10, "%d", 0);
     igSliderFloat("theta", &theta, 0, 5, "%.3f", 0);
     igDragFloat("gravity", &gravity, 0.01, 0, 100, "%.3f", 0);
     igDragFloat("time ms", &time_ms, 0.01, 0, 100, "%.3f", 0);

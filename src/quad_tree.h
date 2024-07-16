@@ -7,7 +7,6 @@
 #include "talloc.h"
 #include "particle.h"
 
-#define THREAD_DEPTH 4
 
 typedef struct __qtree {
   float massx, massy;
@@ -17,6 +16,8 @@ typedef struct __qtree {
   struct __qtree *a, *b, *c, *d;
 } qtree_node_t;
 
+
+extern int thread_depth;
 extern qtree_node_t *qtree;
 extern float theta;
 

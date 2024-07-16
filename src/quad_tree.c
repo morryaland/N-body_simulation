@@ -9,6 +9,7 @@
 
 qtree_node_t *qtree;
 float theta = 0.5f;
+int thread_depth = 2;
 
 struct args {
   qtree_node_t *parent;
@@ -69,7 +70,7 @@ static void *quad_tree(void *args)
   int midx = (nx + ex) >> 1;
   int midy = (ny + ey) >> 1;
 
-  if (depth < THREAD_DEPTH) {
+  if (depth < thread_depth) {
     pthread_t ta, tb, tc, td;
     pthread_create(&ta, NULL, quad_tree, &(struct args){node, nx, ny, midx, midy, depth + 1});
     pthread_create(&tb, NULL, quad_tree, &(struct args){node, midx, ny, ex, midy, depth + 1});
