@@ -8,25 +8,12 @@
 #include "quad_tree.h"
 
 qtree_node_t *qtree;
-float theta = 0.5f;
-int thread_depth = 2;
 
-struct args {
-  qtree_node_t *parent;
-  int nx, ny, ex, ey, depth;
-};
-
-static void *quad_tree(void *args);
+static qtree_node_t *quad_tree(qtree_node_t *parent, int nx, int ny, int ex, int ey);
 static int particle_ln();
 
-static void *quad_tree(void *args)
+static qtree_node_t *quad_tree(qtree_node_t *parent, int nx, int ny, int ex, int ey)
 {
-  /* parsing args */
-  qtree_node_t *parent = ((struct args*)args)->parent;
-  int nx = ((struct args*)args)->nx, ny = ((struct args*)args)->ny,
-  ex = ((struct args*)args)->ex, ey = ((struct args*)args)->ey,
-  depth = ((struct args*)args)->depth;
-
   if (ex - nx == 1)
     return NULL;
 
@@ -69,26 +56,10 @@ static void *quad_tree(void *args)
   }
   int midx = (nx + ex) >> 1;
   int midy = (ny + ey) >> 1;
-
-  if (depth < thread_depth) {
-    pthread_t ta, tb, tc, td;
-    pthread_create(&ta, NULL, quad_tree, &(struct args){node, nx, ny, midx, midy, depth + 1});
-    pthread_create(&tb, NULL, quad_tree, &(struct args){node, midx, ny, ex, midy, depth + 1});
-    pthread_create(&tc, NULL, quad_tree, &(struct args){node, midx, midy, ex, ey, depth + 1});
-    pthread_create(&td, NULL, quad_tree, &(struct args){node, nx, midy, midx, ey, depth + 1});
- 
-    pthread_join(ta, (void**)&node->a);
-    pthread_join(tb, (void**)&node->b);
-    pthread_join(tc, (void**)&node->c);
-    pthread_join(td, (void**)&node->d);
-  }
-  else {
-    node->a = quad_tree(&(struct args){node, nx, ny, midx, midy, depth});
-    node->b = quad_tree(&(struct args){node, midx, ny, ex, midy, depth});
-    node->c = quad_tree(&(struct args){node, midx, midy, ex, ey, depth});
-    node->d = quad_tree(&(struct args){node, nx, midy, midx, ey, depth});
-  }
-
+  node->a = quad_tree(node, nx, ny, midx, midy);
+  node->b = quad_tree(node, midx, ny, ex, midy);
+  node->c = quad_tree(node, midx, midy, ex, ey);
+  node->d = quad_tree(node, nx, midy, midx, ey);
   return node;
 }
 
@@ -132,7 +103,7 @@ int quad_tree_init()
 
   int bord = 1 << depth;
 
-  qtree = quad_tree(&(struct args){NULL, -bord, -bord, bord, bord, 0});
+  qtree = quad_tree(NULL, -bord, -bord, bord, bord);
   return 0;
 }
 

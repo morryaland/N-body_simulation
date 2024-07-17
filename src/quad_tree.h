@@ -16,8 +16,6 @@ typedef struct __qtree {
   struct __qtree *a, *b, *c, *d;
 } qtree_node_t;
 
-
-extern int thread_depth;
 extern qtree_node_t *qtree;
 extern float theta;
 

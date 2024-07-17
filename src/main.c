@@ -21,12 +21,8 @@ static void *thread_func(void* arg)
     quad_tree_rebuild();
     particle_move();
     pthread_mutex_unlock(&sim_mutex);
-    usleep(10);
-    #ifdef __WIN32
-    sim_speed = (clock() - bef) * 100;
-    #else
+    usleep(1);
     sim_speed = (clock() - bef);
-    #endif
     if (sim_speed < time_ms * 1000)
       usleep(time_ms * 1000 - sim_speed);
   }

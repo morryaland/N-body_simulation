@@ -12,6 +12,7 @@ particle_t *particles;
 int particle_c;
 float gravity = 0;
 float time_ms = 20;
+float theta = 0.5f;
 
 static int count;
 static float *distance;
@@ -67,7 +68,7 @@ void particle_move()
     return;
   for (int i = 0; i < particle_c; i++) {
     count = 0;
-    particle = malloc(sizeof(particle_t*));
+    particle = &(particle_t*){};
     *particle = particles + i;
     distancef(qtree);
     float acx = 0;
@@ -89,7 +90,6 @@ void particle_move()
     (**particle).speedy += acy;
     (**particle).x += (**particle).speedx;
     (**particle).y += (**particle).speedy;
-    free(particle);
     free(distance);
     free(out);
     distance = NULL;
