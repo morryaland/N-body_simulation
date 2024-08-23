@@ -19,6 +19,7 @@ stddef.h
 
 win_raylib_path="./lib/win/libraylib.a -lgdi32 -lwinmm"
 linux_raylib_path="./lib/linux/libraylib.a"
+freebsd_raylib_path="-lraylib"
 mac_raylib_path="./lib/macos/libraylib.a"
 
 case "${host_os}" in
@@ -33,6 +34,10 @@ case "${host_os}" in
     darwin*)
         LIBS=$mac_raylib_path
         OS=Darwin
+        ;;
+    freebsd*)
+        LIBS=$freebsd_raylib_path
+        OS=Linux
         ;;
     *)
         AC_MSG_ERROR(["OS $host_os is not supported"])
