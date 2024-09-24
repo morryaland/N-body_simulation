@@ -11,6 +11,7 @@
 
 unsigned int sim_speed;
 
+static unsigned int particle_spawn_c = 1;
 static bool hovered;
 static bool draw_qtree;
 static bool draw_upper;
@@ -61,18 +62,18 @@ void draw_imgui()
   igBeginTabBar("Tab Bar", 0);
   if(igBeginTabItem("Simulation", NULL, 0)) {
     igSliderFloat("theta", &theta, 0, 5, "%.3f", 0);
+    igSliderFloat("time ms", &time_ms, 0, 100, "%.3f", 0);
     igDragFloat("gravity", &gravity, 0.01, 0, 100, "%.3f", 0);
-    igDragFloat("time ms", &time_ms, 0.01, 0, 100, "%.3f", 0);
     igCheckbox("Draw quad tree ", &draw_qtree);
     if (draw_qtree) {
       igSameLine(0, 0);
       igCheckbox("Draw upper", &draw_upper);
     }
-    igText("Simulation average %.3f ms", sim_speed / 1000.0f);
     igText("Application average %.3f ms", 1000.0f / igGetIO()->Framerate);
     igEndTabItem();
   }
   if(igBeginTabItem("Particle Editor", NULL, 0)) {
+    igSliderInt("Spawn", &particle_spawn_c, 1, 200, "%d", 0);
     if (igButton("Clean", (ImVec2){ 0 }))
       particle_clean();
 
@@ -133,14 +134,10 @@ void get_input()
   if (hovered)
     return;
 
-  if (IsKeyDown(KEY_ONE)) {
-    Vector2 pos = GetScreenToWorld2D(GetMousePosition(), cam);
-    particle_add(pos.x, pos.y);
-  }
-
   if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
     Vector2 pos = GetScreenToWorld2D(GetMousePosition(), cam);
-    particle_add(pos.x, pos.y);
+    for (int i = 0; i < particle_spawn_c; i++)
+      particle_add(cosf(i * 180.0f / PI) * particle_spawn_c + pos.x, sinf(i * 180.0f / PI) * particle_spawn_c + pos.y);
   }
 
   if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
