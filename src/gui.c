@@ -13,8 +13,10 @@ unsigned int sim_speed;
 
 static unsigned int particle_spawn_c = 1;
 static bool hovered;
+static bool draw_force;
 static bool draw_qtree;
 static bool draw_upper;
+static bool isdraw_mass;
 
 static Camera2D cam = {
   .offset = (Vector2){ SCREEN_WIDTH/2.0f, SCREEN_HEIGHT/2.0f},
@@ -64,10 +66,13 @@ void draw_imgui()
     igSliderFloat("theta", &theta, 0, 5, "%.3f", 0);
     igSliderFloat("time ms", &time_ms, 0, 100, "%.3f", 0);
     igDragFloat("gravity", &gravity, 0.01, 0, 100, "%.3f", 0);
+    igCheckbox("Draw force", &draw_force);
     igCheckbox("Draw quad tree ", &draw_qtree);
     if (draw_qtree) {
       igSameLine(0, 0);
       igCheckbox("Draw upper", &draw_upper);
+      igSameLine(0, 0);
+      igCheckbox("Draw mass", &isdraw_mass);
     }
     igText("Application average %.3f ms", 1000.0f / igGetIO()->Framerate);
     igEndTabItem();
@@ -110,11 +115,15 @@ void draw_window()
     ClearBackground(BLACK);
     BeginMode2D(cam);
       for (int i = 0; i < particle_c; i++) {
+	if (draw_force)
+	  DrawLine(particles[i].x, particles[i].y, particles[i].x + particles[i].speedx * 10, particles[i].y + particles[i].speedy * 10, PURPLE);
         DrawCircle(particles[i].x, particles[i].y, 4, WHITE);
       }
       if (draw_qtree) {
         pthread_mutex_lock(&sim_mutex);
         draw_quad_tree(qtree);
+	if (isdraw_mass)
+	  draw_mass(qtree);
         pthread_mutex_unlock(&sim_mutex);
       }
     EndMode2D();
@@ -178,5 +187,18 @@ void draw_quad_tree(qtree_node_t *node)
     DrawLine(node->nx, node->ny, node->nx, node->ey, DARKGREEN);
     DrawLine(node->nx, node->ey, node->ex, node->ey, DARKGREEN);
     DrawLine(node->ex, node->ny, node->ex, node->ey, DARKGREEN);
+  }
+}
+
+void draw_mass(qtree_node_t *node)
+{
+  if (!node)
+    return;
+  DrawCircle(node->massx, node->massy, node->mass > 10 ? 10 : node->mass, RED);
+  if (node->a || node->b || node->c || node->d) {
+  draw_mass(node->a);
+  draw_mass(node->b);
+  draw_mass(node->c);
+  draw_mass(node->d);
   }
 }

@@ -26,4 +26,6 @@ void destroy_gui();
 
 void draw_quad_tree(qtree_node_t *node);
 
+void draw_mass(qtree_node_t *node);
+
 #endif
